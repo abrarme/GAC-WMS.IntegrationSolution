@@ -102,6 +102,7 @@ To integrate **external customer ERP systems** with **GAC’s Warehouse Manageme
 | Retry	                  |	Polly|
 | Validator	              |	FluentValidation|
 | Notification	          |	SMTP (SmtpClient)|
+| Containerization	      |	Docker (for packaging, building, and deploying the application)|
 
 ## 📁 Directory Structure
 
