@@ -1,0 +1,6 @@
+@GAC_WMS.IntegrationSolution_HostAddress = http://localhost:5240
+
+GET {{GAC_WMS.IntegrationSolution_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

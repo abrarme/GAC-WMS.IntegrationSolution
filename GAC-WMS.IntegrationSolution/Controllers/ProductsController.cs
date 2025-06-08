@@ -1,0 +1,84 @@
+﻿using GAC_WMS.IntegrationSolution.Data;
+using GAC_WMS.IntegrationSolution.Models;
+using GAC_WMS.IntegrationSolution.Repositories.Interface;
+using Microsoft.AspNetCore.Mvc;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace GAC_WMS.IntegrationSolution.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductsController : ControllerBase
+    {
+
+        private readonly IProductRepository _repository;
+        private readonly ILogger<ProductsController> _logger;
+
+        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        // GET: api/products
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        {
+            return Ok(await _repository.GetAllAsync());
+        }
+
+        // GET: api/products/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Product>> GetById(int id)
+        {
+            var product = await _repository.GetByIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
+
+        // POST: api/products (single)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Product product)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _repository.AddAsync(product);
+            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+        }
+
+        // POST: api/products/bulk
+        [HttpPost("bulk")]
+        public async Task<IActionResult> BulkInsert([FromBody] List<Product> products)
+        {
+            if (products == null || products.Count == 0)
+                return BadRequest("Product list cannot be empty.");
+
+            await _repository.BulkInsertAsync(products);
+            return Ok(new { message = "Bulk insert successful", count = products.Count });
+        }
+
+        // PUT: api/products/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Product product)
+        {
+            if (id != product.Id) return BadRequest("ID mismatch.");
+            await _repository.UpdateAsync(product);
+            return NoContent();
+        }
+
+        // DELETE: api/products/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+            await _repository.DeleteAsync(id);
+            return NoContent();
+        }
+
+
+
+
+    }
+
+}

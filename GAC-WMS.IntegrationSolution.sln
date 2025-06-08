@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAC-WMS.IntegrationSolution", "GAC-WMS.IntegrationSolution\GAC-WMS.IntegrationSolution.csproj", "{632762B5-377A-4A02-B3BF-7F1E12441E90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAC.WMS.IntegrationSolution.Tests", "GAC.WMS.IntegrationSolution.Tests\GAC.WMS.IntegrationSolution.Tests.csproj", "{6D49C5A2-2539-4DF1-AAA9-EE4F05FCE2F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{632762B5-377A-4A02-B3BF-7F1E12441E90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{632762B5-377A-4A02-B3BF-7F1E12441E90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{632762B5-377A-4A02-B3BF-7F1E12441E90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{632762B5-377A-4A02-B3BF-7F1E12441E90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D49C5A2-2539-4DF1-AAA9-EE4F05FCE2F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D49C5A2-2539-4DF1-AAA9-EE4F05FCE2F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D49C5A2-2539-4DF1-AAA9-EE4F05FCE2F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D49C5A2-2539-4DF1-AAA9-EE4F05FCE2F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26373E20-FDF4-4521-AB6F-197901656F6A}
+	EndGlobalSection
+EndGlobal
