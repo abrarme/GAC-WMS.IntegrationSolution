@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GAC_WMS.IntegrationSolution.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250605131929_AddedColumnsandMaxlengthforCutomer_Product")]
-    partial class AddedColumnsandMaxlengthforCutomer_Product
+    [Migration("20250608110515_AlterTablesColumns4")]
+    partial class AlterTablesColumns4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,18 +75,15 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Dimensions")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProductCode")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -109,19 +106,23 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
+                    b.Property<string>("CustomerIdentifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("OrderId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("ProcessingDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerIdentifier");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
 
                     b.ToTable("PurchaseOrders");
                 });
@@ -145,8 +146,6 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.HasIndex("PurchaseOrderId");
 
                     b.ToTable("PurchaseOrderItems");
@@ -163,20 +162,28 @@ namespace GAC_WMS.IntegrationSolution.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OrderId")
+                    b.Property<string>("CustomerIdentifier")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("ProcessingDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ShipmentAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
 
                     b.ToTable("SalesOrders");
                 });
@@ -200,8 +207,6 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.HasIndex("SalesOrderId");
 
                     b.ToTable("SalesOrderItems");
@@ -210,8 +215,9 @@ namespace GAC_WMS.IntegrationSolution.Migrations
             modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.PurchaseOrder", b =>
                 {
                     b.HasOne("GAC_WMS.IntegrationSolution.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .WithMany("PurchaseOrders")
+                        .HasForeignKey("CustomerIdentifier")
+                        .HasPrincipalKey("CustomerIdentifier")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -220,27 +226,17 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
             modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.PurchaseOrderItem", b =>
                 {
-                    b.HasOne("GAC_WMS.IntegrationSolution.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GAC_WMS.IntegrationSolution.Models.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("GAC_WMS.IntegrationSolution.Models.PurchaseOrder", null)
                         .WithMany("Items")
                         .HasForeignKey("PurchaseOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.SalesOrder", b =>
                 {
                     b.HasOne("GAC_WMS.IntegrationSolution.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("SalesOrders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -250,21 +246,18 @@ namespace GAC_WMS.IntegrationSolution.Migrations
 
             modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.SalesOrderItem", b =>
                 {
-                    b.HasOne("GAC_WMS.IntegrationSolution.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GAC_WMS.IntegrationSolution.Models.SalesOrder", "SalesOrder")
+                    b.HasOne("GAC_WMS.IntegrationSolution.Models.SalesOrder", null)
                         .WithMany("Items")
                         .HasForeignKey("SalesOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.Navigation("Product");
+            modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.Customer", b =>
+                {
+                    b.Navigation("PurchaseOrders");
 
-                    b.Navigation("SalesOrder");
+                    b.Navigation("SalesOrders");
                 });
 
             modelBuilder.Entity("GAC_WMS.IntegrationSolution.Models.PurchaseOrder", b =>

@@ -26,6 +26,12 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Implementation
             return await _dbContext.Products.FindAsync(id);
         }
 
+        public async Task<Product> GetByProductCode(string productCode)
+        {
+            return await _dbContext.Products
+                .FirstOrDefaultAsync(c => c.ProductCode == productCode);
+        }
+
         public async Task AddAsync(Product product)
         {
             await _dbContext.Products.AddAsync(product);

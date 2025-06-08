@@ -1,4 +1,6 @@
-﻿using GAC_WMS.IntegrationSolution.Data;
+﻿using AutoMapper;
+using GAC_WMS.IntegrationSolution.Data;
+using GAC_WMS.IntegrationSolution.DTO;
 using GAC_WMS.IntegrationSolution.Models;
 using GAC_WMS.IntegrationSolution.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -14,36 +16,48 @@ namespace GAC_WMS.IntegrationSolution.Controllers
 
         private readonly IProductRepository _repository;
         private readonly ILogger<ProductsController> _logger;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
+        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger,IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // GET: api/products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetAll()
         {
-            return Ok(await _repository.GetAllAsync());
+            var products = await _repository.GetAllAsync();
+            var result = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return Ok(result);
         }
 
         // GET: api/products/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetById(int id)
+        public async Task<ActionResult<Product>> GetById(int id)    
         {
             var product = await _repository.GetByIdAsync(id);
             if (product == null) return NotFound();
             return Ok(product);
         }
 
-        // POST: api/products (single)
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Product product)
+        [HttpGet("product-code/{productcode}")]
+        public async Task<ActionResult<Customer>> GetByIdentifier(string productcode)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var product = await _repository.GetByProductCode(productcode);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
+
+        // POST: api/products (single)
+        [HttpPost("Create")]
+        public async Task<IActionResult> Create([FromBody] ProductDto dto)
+        {
+            var product = _mapper.Map<Product>(dto);
             await _repository.AddAsync(product);
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            return CreatedAtAction(nameof(GetAll), new { id = product.Id }, dto);
         }
 
         // POST: api/products/bulk
@@ -59,9 +73,12 @@ namespace GAC_WMS.IntegrationSolution.Controllers
 
         // PUT: api/products/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Product product)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductDto dto)
         {
-            if (id != product.Id) return BadRequest("ID mismatch.");
+            var product = await _repository.GetByIdAsync(id);
+            if (product == null) return NotFound();
+
+            _mapper.Map(dto, product);
             await _repository.UpdateAsync(product);
             return NoContent();
         }

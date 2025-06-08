@@ -1,0 +1,34 @@
+{
+  "Products": [
+    {
+      "ProductCode": "P1032",
+      "Title": "Product 32",
+      "Description": "POIipoi",
+      "Dimensions": "24X46"
+    },
+    {
+      "ProductCode": "P1045",
+      "Title": "Product 45",
+      "Description": "High quality widget",
+      "Dimensions": "30X50"
+    },
+    {
+      "ProductCode": "P1099",
+      "Title": "Product 99",
+      "Description": "Economical option",
+      "Dimensions": "20X40"
+    },
+    {
+      "ProductCode": "P1120",
+      "Title": "Product 120",
+      "Description": "Premium build",
+      "Dimensions": "25X55"
+    },
+    {
+      "ProductCode": "P1150",
+      "Title": "Product 150",
+      "Description": "Lightweight design",
+      "Dimensions": "22X48"
+    }
+  ]
+}

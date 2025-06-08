@@ -1,0 +1,17 @@
+
+<Customers>
+  <Customer>
+    <CustomerIdentifier>ABC123</CustomerIdentifier>
+    <Name>John Doe</Name>
+    <Email>john.doe@example.com</Email>
+    <Address>123 Main St</Address>
+    <Contact>1234567890</Contact>
+  </Customer>
+<Customer>
+    <CustomerIdentifier>CDB123</CustomerIdentifier>
+    <Name>John Cooper</Name>
+    <Email>john.doe@example.com</Email>
+    <Address>123 Main St</Address>
+    <Contact>1234567890</Contact>
+  </Customer>
+</Customers>

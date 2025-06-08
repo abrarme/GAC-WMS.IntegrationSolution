@@ -21,8 +21,13 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Implementation
             return await _dbContext.Customers.ToListAsync();
         }
 
-        public async Task<Customer> GetByIdAsync(int id)
+        public async Task<Customer> GetByIdentifierAsync(string customerIdentifier)
         {
+            return await _dbContext.Customers
+                .FirstOrDefaultAsync(c => c.CustomerIdentifier == customerIdentifier);
+        }
+        public async Task<Customer> GetByIdAsync(int id)
+        {   
             return await _dbContext.Customers.FindAsync(id);
         }
 
@@ -37,7 +42,7 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Implementation
             if (customers == null || !customers.Any())
                 return;
 
-            var incomingCodes = customers
+            var incomingCodes =customers
                 .Where(p => !string.IsNullOrWhiteSpace(p.CustomerIdentifier))
                 .Select(p => p.CustomerIdentifier)
                 .ToHashSet();
@@ -47,11 +52,11 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Implementation
                 .Select(p => p.CustomerIdentifier)
                 .ToListAsync();
 
-            var newCustomers = customers
+            var newCustomers =customers
                 .Where(p => !existingCodes.Contains(p.CustomerIdentifier))
                 .ToList();
 
-            var duplicates = customers
+            var duplicates =customers
                 .Where(p => existingCodes.Contains(p.CustomerIdentifier))
                 .ToList();
 
@@ -69,7 +74,7 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Implementation
                 await _dbContext.Customers.AddRangeAsync(newCustomers);
                 await _dbContext.SaveChangesAsync();
             }
-
+          
         }
 
         public async Task UpdateAsync(Customer customer)

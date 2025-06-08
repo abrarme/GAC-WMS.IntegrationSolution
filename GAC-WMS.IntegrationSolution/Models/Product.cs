@@ -8,17 +8,16 @@ namespace GAC_WMS.IntegrationSolution.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
         public string ProductCode { get; set; }
-            
-        [Required]
-        [MaxLength(200)]
-        public string Title { get; set; }   
 
-        [MaxLength(200)]
+        [Required, MaxLength(200)]
+        public string Title { get; set; }
+
         public string Description { get; set; }
-
-        [MaxLength(200)]
         public string Dimensions { get; set; }
+
+
+
+
     }
 }

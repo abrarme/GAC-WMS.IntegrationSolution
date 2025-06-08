@@ -41,7 +41,8 @@ public class FilePollingJobTests
         var logger = Substitute.For<ILogger<FilePollingJob>>();
         var processorFactory = Substitute.For<IFileProcessorFactory>();
         var fileErrorHandler = Substitute.For<IFileErrorHandler>();
-        var job = new FilePollingJob(logger, processorFactory, configuration, fileErrorHandler);
+        var emailService = Substitute.For<IEmailService>();
+        var job = new FilePollingJob(logger, processorFactory, configuration, fileErrorHandler, emailService);
 
         var context = Substitute.For<IJobExecutionContext>();
 
@@ -90,10 +91,11 @@ public class FilePollingJobTests
         var processorFactory = Substitute.For<IFileProcessorFactory>();
         var processor = Substitute.For<IFileProcessor>();
         var fileErrorHandler = Substitute.For<IFileErrorHandler>();
+        var emailService = Substitute.For<IEmailService>();
 
         processorFactory.GetProcessor(Arg.Any<string>()).Returns(processor);
 
-        var job = new FilePollingJob(logger, processorFactory, configuration,fileErrorHandler);
+        var job = new FilePollingJob(logger, processorFactory, configuration,fileErrorHandler,emailService);
 
         var context = Substitute.For<IJobExecutionContext>();
 
@@ -141,6 +143,7 @@ public class FilePollingJobTests
         var processorFactory = Substitute.For<IFileProcessorFactory>();
         var processor = Substitute.For<IFileProcessor>();
         var fileErrorHandler = Substitute.For<IFileErrorHandler>();
+        var emailService = Substitute.For<IEmailService>();
 
         var exception = new System.Exception("Processing failed");
         processorFactory.GetProcessor(Arg.Any<string>()).Returns(processor);
@@ -148,7 +151,7 @@ public class FilePollingJobTests
 
         // Mock FileHelper.MoveToError static method — if possible, wrap in interface or skip here
 
-        var job = new FilePollingJob(logger, processorFactory, configuration,fileErrorHandler);
+        var job = new FilePollingJob(logger, processorFactory, configuration,fileErrorHandler, emailService);
 
         var context = Substitute.For<IJobExecutionContext>();
 

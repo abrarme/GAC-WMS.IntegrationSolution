@@ -45,12 +45,13 @@ namespace GAC_WMS.IntegrationSolution.Services.Implementation
                     {
                         await _wmsClient.PushDataAsync(records, endPoint);
 
-                        FileHelper.Archive(filePath);
-                        _logger.LogInformation("Successfully processed and archived: {FilePath}", filePath);
+                      
                     }
                         
                 }
 
+                FileHelper.Archive(filePath);
+                _logger.LogInformation("Successfully processed and archived: {FilePath}", filePath);
 
             }
             catch (Exception ex)

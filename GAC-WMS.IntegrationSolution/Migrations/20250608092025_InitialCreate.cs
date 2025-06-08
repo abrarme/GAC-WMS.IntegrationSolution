@@ -17,9 +17,11 @@ namespace GAC_WMS.IntegrationSolution.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CustomerIdentifier = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Contact = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,8 +34,8 @@ namespace GAC_WMS.IntegrationSolution.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Dimensions = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -72,7 +74,7 @@ namespace GAC_WMS.IntegrationSolution.Migrations
                     OrderId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProcessingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
-                    ShipmentAddress = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ShipmentAddress = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,6 +140,18 @@ namespace GAC_WMS.IntegrationSolution.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Customers_CustomerIdentifier",
+                table: "Customers",
+                column: "CustomerIdentifier",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_ProductCode",
+                table: "Products",
+                column: "ProductCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrderItems_ProductId",

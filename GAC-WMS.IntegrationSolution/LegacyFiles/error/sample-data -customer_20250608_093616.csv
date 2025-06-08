@@ -1,0 +1,11 @@
+CustomerIdentifier,Name,Email,Address,Contact
+CUST001,John Doe,john.doe@example.com,123 Main St,+1-555-1234
+CUST002,Acme Corp,contact@acme.com,456 Elm St,+1-555-5678
+CUST003,Jane Smith,jane.smith@example.com,789 Oak St,+1-555-9012
+CUST004,Global Traders,info@globaltraders.com,101 Maple Ave,+1-555-3456
+CUST005,Tech Hub,support@techhub.io,202 Pine St,+1-555-7890
+CUST006,Logistics Ltd,contact@logistics.com,303 Birch Rd,+1-555-4321
+CUST007,NextGen Inc,sales@nextgen.com,404 Cedar Ln,+1-555-8765
+CUST008,Fresh Foods,fresh@foods.com,505 Willow Dr,+1-555-2109
+CUST009,Smart Solutions,hello@smartsol.com,606 Spruce Ct,+1-555-6543
+CUST010,Blue Ocean Ltd,service@blueocean.com,707 Cherry Blvd,+1-555-0987

@@ -23,11 +23,8 @@ namespace GAC_WMS.IntegrationSolution.Services.Implementation
             try
             {
 
-                var json = await File.ReadAllTextAsync(filePath);
-                var records = JsonSerializer.Deserialize<List<ExpandoObject>>(json, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+               // Dynamically specify the type (e.g. Product, Customer, or ExpandoObject)
+                var records = await DeserializeDynamicJsonListAsync<ExpandoObject>(filePath);
 
                 if (records != null && records.Any())
                 {
@@ -45,5 +42,42 @@ namespace GAC_WMS.IntegrationSolution.Services.Implementation
                 FileHelper.MoveToError(filePath, ex);
             }
         }
+
+        public async Task<List<T>?> DeserializeDynamicJsonListAsync<T>(string filePath, string? rootPropertyName = null)
+        {
+            var json = await File.ReadAllTextAsync(filePath);
+
+            using var document = JsonDocument.Parse(json);
+            JsonElement root = document.RootElement;
+
+            // If rootPropertyName not provided, try to detect first property with array value
+            if (rootPropertyName == null)
+            {
+                foreach (var property in root.EnumerateObject())
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Array)
+                    {
+                        rootPropertyName = property.Name;
+                        break;
+                    }
+                }
+
+                if (rootPropertyName == null)
+                {
+                    throw new InvalidOperationException("No array property found at the root of JSON.");
+                }
+            }
+
+            if (!root.TryGetProperty(rootPropertyName, out var arrayElement))
+                throw new InvalidOperationException($"Root JSON does not contain property '{rootPropertyName}'.");
+
+            var arrayJson = arrayElement.GetRawText();
+
+            return JsonSerializer.Deserialize<List<T>>(arrayJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using GAC_WMS.IntegrationSolution.Data;
+﻿using AutoMapper;
+using GAC_WMS.IntegrationSolution.Data;
+using GAC_WMS.IntegrationSolution.DTO;
 using GAC_WMS.IntegrationSolution.Models;
 using GAC_WMS.IntegrationSolution.Repositories.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -14,36 +16,50 @@ namespace GAC_WMS.IntegrationSolution.Controllers
 
         private readonly ICustomerRepository _repository;
         private readonly ILogger<CustomersController> _logger;
+        private readonly IMapper _mapper;
 
-        public CustomersController(ICustomerRepository repository, ILogger<CustomersController> logger)
+        public CustomersController(ICustomerRepository repository, ILogger<CustomersController> logger, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(await _repository.GetAllAsync());
+            var customers = await _repository.GetAllAsync();
+            var result = _mapper.Map<IEnumerable<CustomerDto>>(customers);
+            return Ok(result);
         }
+
 
         // GET: api/Customers/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetById(int id)
+        public async Task<ActionResult<Customer>> GetById(int id)
         {
             var product = await _repository.GetByIdAsync(id);
             if (product == null) return NotFound();
             return Ok(product);
         }
 
-        // POST: api/customer (single)
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Customer customer)
+
+        [HttpGet("customer-identifier/{customerIdentifier}")]
+        public async Task<ActionResult<Customer>> GetByIdentifier(string customerIdentifier)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var product = await _repository.GetByIdentifierAsync(customerIdentifier);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
+
+        // POST: api/customer (single)
+        [HttpPost("Create")]
+        public async Task<IActionResult> Create([FromBody] CustomerDto dto)
+        {
+            var customer = _mapper.Map<Customer>(dto);
             await _repository.AddAsync(customer);
-            return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
+            return CreatedAtAction(nameof(GetAll), new { id = customer.Id }, dto);
         }
 
         // POST: api/customers/bulk
@@ -59,9 +75,12 @@ namespace GAC_WMS.IntegrationSolution.Controllers
 
         // PUT: api/customers/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Customer customer)
+        public async Task<IActionResult> Update(int id, [FromBody] CustomerDto dto)
         {
-            if (id != customer.Id) return BadRequest("ID mismatch.");
+            var customer = await _repository.GetByIdAsync(id);
+            if (customer == null) return NotFound();
+
+            _mapper.Map(dto, customer);
             await _repository.UpdateAsync(customer);
             return NoContent();
         }

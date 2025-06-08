@@ -6,6 +6,8 @@ namespace GAC_WMS.IntegrationSolution.Repositories.Interface
     {
         Task<IEnumerable<Customer>> GetAllAsync();
         Task<Customer> GetByIdAsync(int id);
+
+        Task<Customer> GetByIdentifierAsync(string customerIdentifier);
         Task AddAsync(Customer Customer);
         Task BulkInsertAsync(IEnumerable<Customer> Customers);
         Task UpdateAsync(Customer Customer);

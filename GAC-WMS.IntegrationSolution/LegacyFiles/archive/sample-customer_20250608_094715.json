@@ -1,0 +1,39 @@
+{
+  "Customers": [
+    {
+      "CustomerIdentifier": "ABC123",
+      "Name": "John Doe",
+      "Email": "john.doe@example.com",
+      "Address": "123 Main St",
+      "Contact": "1234567890"
+    },
+    {
+      "CustomerIdentifier": "XYZ456",
+      "Name": "Jane Smith",
+      "Email": "jane.smith@example.com",
+      "Address": "456 Oak Avenue",
+      "Contact": "9876543210"
+    },
+    {
+      "CustomerIdentifier": "LMN789",
+      "Name": "Alice Johnson",
+      "Email": "alice.johnson@example.net",
+      "Address": "789 Pine Lane",
+      "Contact": "5551234567"
+    },
+    {
+      "CustomerIdentifier": "PQR321",
+      "Name": "Bob Martin",
+      "Email": "bob.martin@example.org",
+      "Address": "321 Maple Drive",
+      "Contact": "4449876543"
+    },
+    {
+      "CustomerIdentifier": "DEF654",
+      "Name": "Charlie Brown",
+      "Email": "charlie.brown@example.com",
+      "Address": "654 Elm Street",
+      "Contact": "2223334444"
+    }
+  ]
+}

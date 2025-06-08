@@ -5,12 +5,19 @@ namespace GAC_WMS.IntegrationSolution.Models
     public class PurchaseOrder
     {
         public int Id { get; set; }
+
         [Required]
         public string OrderId { get; set; }
+
         [Required]
         public DateTime ProcessingDate { get; set; }
-        public int CustomerId { get; set; }
+
+        [Required]
+        public string CustomerIdentifier { get; set; }
+
         public Customer Customer { get; set; }
-        public List<PurchaseOrderItem> Items { get; set; }
+
+
+        public ICollection<PurchaseOrderItem> Items { get; set; }
     }
 }
