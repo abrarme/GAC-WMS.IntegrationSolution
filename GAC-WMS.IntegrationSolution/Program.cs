@@ -1,5 +1,5 @@
-using FluentValidation.AspNetCore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using GAC_WMS.IntegrationSolution.Clients;
 using GAC_WMS.IntegrationSolution.Data;
 using GAC_WMS.IntegrationSolution.Helper;
@@ -12,47 +12,69 @@ using GAC_WMS.IntegrationSolution.Services.Implementation;
 using GAC_WMS.IntegrationSolution.Services.Interface;
 using GAC_WMS.IntegrationSolution.Validator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register DbContext
+#region Logging - Serilog
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/GAC-WMS_logs.log", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+#endregion
+
+#region Services - DbContext & Retry Policy
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register Retry Policy
 builder.Services.AddScoped<RetryPolicyHandler>();
 
-// Register File Processing Services
+#endregion
+
+#region Services - File Processing
 
 builder.Services.AddScoped<IWmsClient, WmsClient>();
+
 builder.Services.AddHttpClient<WmsClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["WMS:BaseUrl"]);
 }).AddHttpMessageHandler<RetryPolicyHandler>();
 
 builder.Services.AddScoped<IFileProcessorFactory, FileProcessorFactory>();
-builder.Services.AddScoped<IXmlParser,XmlParser>();
-builder.Services.AddScoped<IFileErrorHandler,FileErrorHandler>();
+builder.Services.AddScoped<IXmlParser, XmlParser>();
+builder.Services.AddScoped<IFileErrorHandler, FileErrorHandler>();
 builder.Services.AddScoped<CsvFileProcessor>();
 builder.Services.AddScoped<JsonFileProcessor>();
 builder.Services.AddScoped<XmlFileProcessor>();
 
+#endregion
 
-//Register Email Service
+#region Services - Email
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+#endregion
 
+#region Repositories
 
-//  Register repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
 builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
 
+#endregion
+
+#region Jobs - Quartz
+
+builder.Services.AddScoped<FilePollingJob>();
 
 builder.Services.AddQuartz(q =>
 {
@@ -60,24 +82,31 @@ builder.Services.AddQuartz(q =>
     q.ScheduleJob<FilePollingJob>(trigger => trigger
         .WithIdentity("FilePolling")
         .WithCronSchedule(builder.Configuration["FilePolling:Schedule"] ?? "0 */2 * ? * *")
-        .WithDescription("Poll files every 1 mins"));
+        .WithDescription("Poll files every 2 hours"));
 });
+
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-// Register the job class
-builder.Services.AddScoped<FilePollingJob>();
+#endregion
 
-// Configure Serilog
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .WriteTo.File("Logs/GAC-WMS_logs.log", rollingInterval: RollingInterval.Day)
-    .Enrich.FromLogContext()
-    .CreateLogger();
+#region FluentValidation
 
-builder.Host.UseSerilog(); // Use Serilog for logging
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<ProductDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CustomerDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SalesOrderDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<PurchaseOrderDtoValidator>();
 
+#endregion
 
-// Add services to the container.
+#region AutoMapper
+
+builder.Services.AddAutoMapper(typeof(Program));
+
+#endregion
+
+#region Controllers & Swagger
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -86,26 +115,19 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
-builder.Services.AddAutoMapper(typeof(Program));
-// Register FluentValidation validators from the current assembly
-builder.Services.AddFluentValidationAutoValidation(); // Enables automatic validation
-builder.Services.AddFluentValidationClientsideAdapters(); // Enables client-side validation (optional)
-builder.Services.AddValidatorsFromAssemblyContaining<ProductDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CustomerDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<SalesOrderDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<PurchaseOrderDtoValidator>();
-
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
 });
 
+#endregion
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+#region Middleware Pipeline
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -113,7 +135,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseGlobalExceptionHandler();  // Register custom error middleware
+    app.UseGlobalExceptionHandler(); // Custom middleware
 }
 
 app.UseHttpsRedirection();
@@ -121,5 +143,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+#endregion
 
 app.Run();

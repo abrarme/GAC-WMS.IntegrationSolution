@@ -1,27 +1,25 @@
-# Use the ASP.NET runtime image for base
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-
-# Build stage using SDK image with git installation
+﻿# Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Install git for restoring from Git-based dependencies
-RUN apt-get update && apt-get install -y git
+# Copy only the .csproj file and restore
+COPY ./GAC-WMS.IntegrationSolution.csproj ./
+RUN dotnet restore ./GAC-WMS.IntegrationSolution.csproj
 
-# Copy and restore project
-COPY *.csproj ./
-RUN dotnet restore
-
+# Copy the rest of the files and publish
 COPY . .
-RUN dotnet build -c Release -o /app/build
+RUN dotnet publish ./GAC-WMS.IntegrationSolution.csproj -c Release -o /app/publish
 
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
-
-# Final image
-FROM base AS final
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+# Remove this line: USER app
+# → It restricts permissions and may cause Kestrel to fail to bind to port 80
+
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://0.0.0.0:80
+# Use port 80 (which is expected by default for ASP.NET Core)
+EXPOSE 8085
+# Start the app
 ENTRYPOINT ["dotnet", "GAC-WMS.IntegrationSolution.dll"]

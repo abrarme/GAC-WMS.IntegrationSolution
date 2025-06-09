@@ -25,6 +25,11 @@
 *.md
 *.user
 *.log
+bin/
+obj/
+.vscode/
+*.user
+*.suo
 LICENSE
 README.md
 !**/.gitignore
