@@ -11,7 +11,6 @@ using GAC_WMS.IntegrationSolution.Services;
 using GAC_WMS.IntegrationSolution.Services.Implementation;
 using GAC_WMS.IntegrationSolution.Services.Interface;
 using GAC_WMS.IntegrationSolution.Validator;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
