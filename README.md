@@ -103,6 +103,8 @@ To integrate **external customer ERP systems** with **GAC’s Warehouse Manageme
 | Validator	              |	FluentValidation|
 | Notification	          |	SMTP (SmtpClient)|
 | Containerization	      |	Docker (for packaging, building, and deploying the application)|
+| JWT Bearer Authentication	      |	Secure token-based authentication for API access)|
+	
 
 ## 📁 Directory Structure
 
@@ -142,6 +144,18 @@ GAC_WMS.IntegrationSolution/
 - Validate data before insert
 - Mock WMS client to test retry logic
 - Unit tests for repository logic with in-memory DB
+
+## 🔐 Security
+
+- JWT Bearer Authentication
+- Secure endpoints with token-based access
+- Auth controller generates and returns tokens
+
+## 📦 DevOps & Deployment
+
+- Docker + Docker Compose - Containerized services: API, SQL Server
+- Health Checks - SQL Server startup validated before API runs
+
 
 ## 📝 Local Development Setup
 
@@ -197,4 +211,33 @@ dotnet run
 
 ```
 
+## 🔐 Authentication & JWT Setup
+
+This API uses **JWT (JSON Web Token)** bearer authentication to protect secured endpoints. Below are the setup details and credentials for testing.
+
+---
+
+### 🧪 Sample User for Testing
+
+Use the following credentials to log in and receive a JWT token:
+
+| Username | Password     |
+|----------|--------------|
+| `admin`  | `Password@123` |
+
+> ⚠️ These credentials are for **testing only** and should not be used in production environments.
+
+---
+
+### 🛠️ Login Endpoint
+
+**POST** `/api/auth/login`
+
+#### Request Body (JSON):
+
+```json
+{
+  "username": "admin",
+  "password": "Password@123"
+}
 
