@@ -1,20 +1,37 @@
 ﻿version: '3.8'
 
 services:
-  api:
-    build: .
-    ports:
-      - "5000:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=GACWMS;User=sa;Password=Your_password123;
-    depends_on:
-      - db
-
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
     environment:
-      SA_PASSWORD: "Your_password123"
-      ACCEPT_EULA: "Y"
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=sa@12345
     ports:
       - "1433:1433"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pidof sqlservr || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dotnet_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=MyDb;User=sa;Password=sa@12345;TrustServerCertificate=True;
+    ports:
+      - "5000:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

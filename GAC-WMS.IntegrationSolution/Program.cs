@@ -11,7 +11,11 @@ using GAC_WMS.IntegrationSolution.Services;
 using GAC_WMS.IntegrationSolution.Services.Implementation;
 using GAC_WMS.IntegrationSolution.Services.Interface;
 using GAC_WMS.IntegrationSolution.Validator;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Quartz;
 using Serilog;
 using System.Text;
@@ -33,7 +37,15 @@ builder.Host.UseSerilog();
 #region Services - DbContext & Retry Policy
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,               // number of retries
+                maxRetryDelay: TimeSpan.FromSeconds(10), // delay between retries
+                errorNumbersToAdd: null         // add specific SQL error codes if needed
+            );
+        }));
 
 builder.Services.AddScoped<RetryPolicyHandler>();
 
@@ -89,6 +101,29 @@ builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 #endregion
 
+#region Authentication Services
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+#endregion
+
 #region FluentValidation
 
 builder.Services.AddFluentValidationAutoValidation();
@@ -117,14 +152,47 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.EnableAnnotations();
+    options.EnableAnnotations();
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 #endregion
 
 var app = builder.Build();
+
+#region Database Migrations
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate(); // Applies pending migrations and creates DB
+}
+
+#endregion
 
 #region Middleware Pipeline
 
@@ -132,6 +200,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage(); // Shows detailed error
 }
 else
 {
